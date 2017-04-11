@@ -1,0 +1,187 @@
+#! /usr/bin/python
+
+import os
+import sys
+import getpass
+
+from args import args
+
+RES = os.path.dirname(os.path.realpath(__file__)) + '/boil_res'
+
+def C_bHelp(a):
+	a['help'] = True
+
+def C_bIsLib(a):
+	a['isLib'] = True
+
+def C_oLib(a, lib):
+	if not ('libs' in a):
+		a['cl'] = []
+	if not (lib in a['cl']):
+		a['cl'].append(lib)
+
+C_BOOL = {
+	'help': C_bHelp,
+	'h': C_bHelp,
+	'L': C_bIsLib
+}
+
+C_OPTS = {
+	'lib': C_oLib,
+	'l': C_oLib
+}
+
+C_LIBFS = os.path.expanduser('~/proj/libfs')
+C_LIBFT = os.path.expanduser('~/proj/libft')
+C_LIBTM = os.path.expanduser('~/proj/libtm')
+
+C_GITIGNORE = RES + '/c.gitignore'
+C_MAKEFILE  = RES + '/c.mk'
+
+CLIB_MAKEFILE = RES + '/clib.mk'
+
+def C_mkfile(name, argv):
+	cf = [
+		'-Wall',
+		'-Wextra',
+		'-Werror',
+		'-I include'
+	]
+	cl = []
+
+	libs = {
+		'fs': C_LIBFS,
+		'ft': C_LIBFT,
+		'tm': C_LIBTM,
+
+		'libfs': C_LIBFS,
+		'libft': C_LIBFT,
+		'libtm': C_LIBTM
+	}
+
+	if 'cf' in argv:
+		cf.extend(argv['cf'])
+	if 'cl' in argv:
+		cl.extend(argv['cl'])
+
+	clname = []
+	clpath = []
+
+	for lib in cl:
+		if not lib in libs:
+			print('\x1b[91mUnknown library:\x1b[0m ' + lib)
+		else:
+			clpath.append(libs[lib])
+			lib = lib.replace('lib', '')
+			clname.append(lib)
+
+	for (i, lib) in enumerate(clpath):
+		os.system('cp -rf "' + lib + '" "' + name + '/lib/' + clname[i] + '"')
+
+	author = getpass.getuser()
+	cf = ' '.join(cf)
+	cl = ''
+	libclean = ''
+	libreq = ''
+	libmake = ''
+
+	for lib in clname:
+		cl += '-L "lib/' + lib + '" -l "' + lib +  '"'
+		libclean += '\n\tmake fclean -C "lib/' + lib + '"'
+		libreq += ' lib/' + lib + '/lib' + lib + '.a'
+		libmake += '\nlib/' + lib + '/lib' + lib + '.a:\n'
+		libmake += '\tmake re -C "lib/' + lib + '"'
+
+	with open(C_MAKEFILE) as f:
+		mkfile = f.read()
+	mkfile = mkfile.replace('<<NAME>>', name)
+	mkfile = mkfile.replace('<<AUTHOR>>', author)
+	mkfile = mkfile.replace('<<CF>>', cf)
+	mkfile = mkfile.replace('<<CL>>', cl)
+	mkfile = mkfile.replace('<<LIBCLEAN>>', libclean)
+	mkfile = mkfile.replace('<<LIBREQ>>', libreq)
+	mkfile = mkfile.replace('<<LIBMAKE>>', libmake)
+	with open(name + '/Makefile', 'w') as f:
+		f.write(mkfile)
+
+	os.system('vim "' + name + '/Makefile" -c Stdheader -c wq')
+
+def Clib_mkfile(name, argv):
+	cf = [
+		'-Wall',
+		'-Wextra',
+		'-Werror',
+		'-I include'
+	]
+
+	author = getpass.getuser()
+	cf = ' '.join(cf)
+
+	with open(CLIB_MAKEFILE) as f:
+		mkfile = f.read()
+	mkfile = mkfile.replace('<<NAME>>', name)
+	mkfile = mkfile.replace('<<AUTHOR>>', author)
+	mkfile = mkfile.replace('<<CF>>', cf)
+	with open(name + '/Makefile', 'w') as f:
+		f.write(mkfile)
+
+	os.system('vim "' + name + '/Makefile" -c Stdheader -c wq')
+
+def boilC(name, argv):
+	dirs = [
+		'include',
+		'lib',
+		'src'
+	]
+
+	argv = args(C_BOOL, C_OPTS, argv)
+
+	os.system('mkdir -p "' + name + '"')
+	for dir in dirs:
+		os.system('mkdir -p "' + name + '/' + dir + '"')
+
+	if 'isLib' in argv:
+		Clib_mkfile(name, argv)
+	else:
+		C_mkfile(name, argv)
+
+	with open(name + '/author', 'w') as f:
+		f.write(getpass.getuser())
+
+	os.system('cp "' + RES + '/c.gitignore" "' + name + '/.gitignore"')
+
+# ------------------------------------------------------------------------------
+
+LANG = {
+	'C': boilC,
+	'c': boilC,
+}
+
+def main(argv):
+
+	if (len(argv) < 3):
+		print('Usage: boil \x1b[3;4mlang\x1b[0m \x1b[3;4mname\x1b[0m')
+		exit(1);
+
+	lang = argv[1]
+	name = argv[2]
+
+	if (len(argv) > 3):
+		argv = argv[3:]
+	else:
+		argv = []
+
+	if (lang in LANG):
+		LANG[lang](name, argv)
+		print('\x1b[92mFinished!\x1b[0m')
+	else:
+		print("\x1b[93mUnknown language:\x1b[0m '" + lang + "'")
+		os.system('mkdir -p ' + name)
+		with open(name + '/.gitignore', 'w') as f:
+			f.write('')
+		exit(1);
+
+try:
+	main(sys.argv)
+except KeyboardInterrupt:
+	exit(1);

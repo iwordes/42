@@ -1,0 +1,11 @@
+.gitignore
+
+bin
+build
+
+**/*.a
+**/*.o
+
+**/._*
+**/*.sw?
+**/*.DS_Store
