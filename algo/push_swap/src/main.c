@@ -6,7 +6,7 @@
 /*   By: iwordes <iwordes@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/22 12:47:33 by iwordes           #+#    #+#             */
-/*   Updated: 2017/04/17 16:17:22 by iwordes          ###   ########.fr       */
+/*   Updated: 2017/04/30 19:53:00 by iwordes          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ int		main(int argc, char **argv)
 	{
 		sort1(&a, &b);
 		sort2(&a, &b);
-		merge(&a, &b);
 	}
 	free(a.arr);
 	free(b.arr);
@@ -76,7 +75,6 @@ static t_arg	g_arg[] =
 {
 	{ "c", arg_cnt, 0 },
 	{ "v", arg_vis, 0 },
-	//{ "w", arg_wait, 0 },
 	{ NULL, NULL, 0 }
 };
 

@@ -1,35 +1,44 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   check_asc.c                                        :+:      :+:    :+:   */
+/*   _srot.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: iwordes <iwordes@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/30 19:54:14 by iwordes           #+#    #+#             */
-/*   Updated: 2017/04/30 19:54:15 by iwordes          ###   ########.fr       */
+/*   Created: 2017/03/30 15:43:06 by iwordes           #+#    #+#             */
+/*   Updated: 2017/04/30 19:53:21 by iwordes          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <push_swap.h>
 
-#define S (s->arr + s->len - 1)
-#define I1 ((o + i) % s->len)
-#define I2 ((o + i + 1) % s->len)
-
-int		check_asc(t_stack *s)
+static void	putop(char *op, char s)
 {
-	int		i;
-	int		o;
-
-	i = 0;
-	o = 0;
-	while (S[-o] != s->min)
-		o += 1;
-	while (i + 1 < s->len)
+	if (s)
 	{
-		if (S[-I1] > S[-I2])
-			return (INT_MIN);
-		i += 1;
+		ft_putstr(op);
+		write(1, &s, 1);
+		write(1, "\n", 1);
 	}
-	return (o);
+}
+
+void		op__srot(t_stack *s, int o, char name)
+{
+	if (s->len < 2)
+		return ;
+	o %= s->len;
+	if (o > s->len / 2)
+		o -= s->len;
+	if (o < 0)
+		while (o++)
+		{
+			putop("rr", name);
+			op__rrot(s);
+		}
+	else
+		while (o--)
+		{
+			putop("r", name);
+			op__rot(s);
+		}
 }
